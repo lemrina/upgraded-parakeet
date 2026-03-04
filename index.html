@@ -208,14 +208,55 @@ box-shadow:0 20px 50px rgba(0,0,0,.4);
 
 <h2>Recent Work</h2>
 
-<div class="gallery">
+<h2>Recent Work</h2>
 
-<div>Add photo</div>
-<div>Add photo</div>
-<div>Add photo</div>
-<div>Add photo</div>
-
+<div id="workGallery" class="gallery">
+  <div>Loading photos…</div>
 </div>
+
+<p style="margin-top:10px;">
+  See more on
+  <a href="https://www.facebook.com/jmvhouseofcurtains" target="_blank" rel="noopener">Facebook</a>
+</p>
+
+<script>
+(async () => {
+  const gallery = document.getElementById("workGallery");
+
+  try {
+    // This is your Cloudflare Worker endpoint (you will create it below)
+    const res = await fetch("/api/photos?limit=8", { cache: "no-store" });
+    if (!res.ok) throw new Error("Gallery fetch failed");
+
+    const data = await res.json();
+    const photos = data?.photos || [];
+
+    if (!photos.length) {
+      gallery.innerHTML = "<div>No photos available right now.</div>";
+      return;
+    }
+
+    gallery.innerHTML = photos.map(p => `
+      <a href="${p.link}" target="_blank" rel="noopener" style="text-decoration:none;">
+        <div style="
+          background:#1f2647;
+          border-radius:10px;
+          overflow:hidden;
+          height:150px;
+          display:flex;
+          align-items:center;
+          justify-content:center;">
+          <img src="${p.thumb}" alt="JMV work photo" loading="lazy"
+               style="width:100%;height:100%;object-fit:cover;display:block;">
+        </div>
+      </a>
+    `).join("");
+
+  } catch (e) {
+    gallery.innerHTML = "<div>Could not load photos. Please visit our Facebook page.</div>";
+  }
+})();
+</script>
 
 <p style="margin-top:10px;">
 See more on
@@ -261,4 +302,5 @@ src="https://www.facebook.com/plugins/page.php?href=https://www.facebook.com/jmv
 </div>
 
 </body>
+
 </html>
